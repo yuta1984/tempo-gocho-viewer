@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   AttributionControl, GeoJSONSource, MapLibreMap, NavigationControl, ScaleControl,
+  setWorkerUrl,
   type MapLayerMouseEvent, type MapMouseEvent,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import {
   CIRCLE_LAYER, INSERT_BEFORE, LABEL_LAYER, NRCT_LAYER, SOURCE_ID,
   circleLayer, heatLayer, labelLayer,
@@ -14,6 +16,10 @@ import {
  * 自前のレイヤは実行時に addLayer で重ねるだけに留める。
  */
 const STYLE_URL = 'https://mierune.github.io/rekichizu-style/styles/street/style.json';
+
+// ワーカーの実体を明示的に教える。これを省くと本番ビルドでワーカーが起動せず、
+// 地図の背景色だけが出てベクトルタイルが1枚も読み込まれない。
+setWorkerUrl(maplibreWorkerUrl);
 
 const EMPTY: GeoJSON.FeatureCollection<GeoJSON.Point> = { type: 'FeatureCollection', features: [] };
 

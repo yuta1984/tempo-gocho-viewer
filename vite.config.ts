@@ -10,5 +10,8 @@ export default defineConfig({
   // maplibre-gl は自前のワーカーを別ファイルとして持つため、
   // 依存の事前バンドルに任せるとワーカーが見つからなくなる
   optimizeDeps: { exclude: ['maplibre-gl'] },
+  // ワーカーは ES モジュールとして出力する。MapLibre は
+  // new Worker(url, { type: 'module' }) で起動しようとする。
+  worker: { format: 'es' },
   server: { open: true },
 });
