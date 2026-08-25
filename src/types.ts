@@ -11,7 +11,9 @@ export const enum F {
   NrctId = 8,
   Confidence = 9,
   Method = 10,
-  ModernPlace = 11,
+  Review = 11,
+  Margin = 12,
+  ModernPlace = 13,
 }
 
 export type Point = [
@@ -26,6 +28,10 @@ export type Point = [
   nrctId: string,
   confidence: number,
   method: number,
+  /** 1 = 人手の確認が要る、0 = 確定 */
+  review: 0 | 1,
+  /** 次点候補とのスコア差。候補が1件なら null */
+  margin: number | null,
   modernPlace: string,
 ];
 
@@ -34,6 +40,7 @@ export interface Source {
   entryId: string;
   villages: number;
   mapped: number;
+  review: number;
   koku: number;
 }
 
@@ -44,7 +51,7 @@ export interface Meta {
   guns: string[];
   methods: string[];
   koku: { breaks: number[]; distribution: number[]; max: number; total: number; totalAll: number };
-  counts: { scanned: number; mapped: number; skippedNoCoord: number };
+  counts: { scanned: number; mapped: number; skippedNoCoord: number; review: number; confirmed: number };
   attribution: { data: string; basemap: string };
 }
 
@@ -56,9 +63,12 @@ export interface Filters {
   kokuMin: number;
   kokuMax: number;
   confidenceMin: number;
+  /** 'all' すべて / 'confirmed' 確定のみ / 'review' 要確認のみ */
+  status: 'all' | 'confirmed' | 'review';
 }
 
 export interface Stats {
   count: number;
   koku: number;
+  review: number;
 }

@@ -1,7 +1,7 @@
 import { F, type Filters, type Meta, type Point, type Stats } from '../types';
 
 export function defaultFilters(meta: Meta): Filters {
-  return { src: null, gun: null, kokuMin: 0, kokuMax: Math.ceil(meta.koku.max), confidenceMin: 0 };
+  return { src: null, gun: null, kokuMin: 0, kokuMax: Math.ceil(meta.koku.max), confidenceMin: 0, status: 'all' };
 }
 
 export function matches(p: Point, f: Filters): boolean {
@@ -10,6 +10,8 @@ export function matches(p: Point, f: Filters): boolean {
   const koku = p[F.Koku];
   if (koku < f.kokuMin || koku > f.kokuMax) return false;
   if (p[F.Confidence] < f.confidenceMin) return false;
+  if (f.status === 'confirmed' && p[F.Review]) return false;
+  if (f.status === 'review' && !p[F.Review]) return false;
   return true;
 }
 
@@ -25,20 +27,22 @@ export function buildGeoJson(
 ): { data: GeoJSON.FeatureCollection<GeoJSON.Point>; stats: Stats } {
   const features: GeoJSON.Feature<GeoJSON.Point>[] = [];
   let koku = 0;
+  let review = 0;
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
     if (!matches(p, f)) continue;
     koku += p[F.Koku];
+    if (p[F.Review]) review++;
     features.push({
       type: 'Feature',
       id: i,
       geometry: { type: 'Point', coordinates: [p[F.Lng], p[F.Lat]] },
-      properties: { koku: p[F.Koku], name: p[F.Name], confidence: p[F.Confidence] },
+      properties: { koku: p[F.Koku], name: p[F.Name], review: p[F.Review] },
     });
   }
   return {
     data: { type: 'FeatureCollection', features },
-    stats: { count: features.length, koku },
+    stats: { count: features.length, koku, review },
   };
 }
 

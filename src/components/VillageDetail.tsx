@@ -15,7 +15,12 @@ export default function VillageDetail({ point, meta, onClose }: Props) {
   return (
     <section className="panel detail">
       <button type="button" className="close" onClick={onClose} aria-label="閉じる">×</button>
-      <h2>{point[F.Name]}</h2>
+      <h2>
+        {point[F.Name]}
+        <span className={point[F.Review] ? 'badge badge-review' : 'badge badge-ok'}>
+          {point[F.Review] ? '要確認' : '確定'}
+        </span>
+      </h2>
       <dl>
         <dt>所属</dt>
         <dd>{source?.label ?? '—'}　{meta.guns[point[F.Gun]] || '—'}</dd>
@@ -30,6 +35,13 @@ export default function VillageDetail({ point, meta, onClose }: Props) {
           {meta.methods[point[F.Method]] || '—'}
           {' / 信頼度 '}
           {point[F.Confidence].toFixed(2)}（{confidenceLabel(point[F.Confidence])}）
+        </dd>
+        <dt>次点差</dt>
+        <dd>
+          {point[F.Margin] === null ? '—（候補は1件だけ）' : point[F.Margin].toFixed(2)}
+          {point[F.Margin] !== null && point[F.Margin] < 0 && (
+            <span className="hint">記載順の制約から、最高得点でない候補を採っています</span>
+          )}
         </dd>
       </dl>
       <ul className="links">

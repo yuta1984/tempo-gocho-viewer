@@ -46,6 +46,21 @@ export default function FilterPanel({ meta, filters, gunOptions, onChange, onRes
       </label>
 
       <label>
+        確認状態
+        <select
+          value={filters.status}
+          onChange={(e) => set({ status: e.target.value as Filters['status'] })}
+        >
+          <option value="all">すべて（{formatCount(meta.counts.mapped)}）</option>
+          <option value="confirmed">確定のみ（{formatCount(meta.counts.confirmed)}）</option>
+          <option value="review">要確認のみ（{formatCount(meta.counts.review)}）</option>
+        </select>
+        <span className="hint">
+          候補が1件で信頼度が高い村、または次点候補を大きく引き離した村を「確定」としています
+        </span>
+      </label>
+
+      <label>
         石高の下限　<strong>{formatKoku(filters.kokuMin)}</strong>
         <input
           type="range"

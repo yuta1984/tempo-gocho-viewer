@@ -107,11 +107,11 @@ export function circleLayer(breaks: number[]): LayerSpecification {
       // 淡い地色から浮かせるための白い縁取り
       'circle-stroke-color': 'rgba(255,255,255,0.9)',
       'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 9, 0.3, 12, 0.8],
-      // 名寄せの信頼度が低い村は薄く出す。隠すより、確かでないことが見える方がよい。
+      // 人手の確認が要る村は薄く出す。隠すより、確かでないことが見える方がよい。
       'circle-opacity': [
         'interpolate', ['linear'], ['zoom'],
         FADE_FROM, 0,
-        FADE_TO, ['case', ['<', ['get', 'confidence'], 0.5], 0.35, 0.8],
+        FADE_TO, ['case', ['==', ['get', 'review'], 1], 0.35, 0.8],
       ],
       'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], FADE_FROM, 0, FADE_TO, 0.85],
     },
