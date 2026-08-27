@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import {
-  AttributionControl, GeoJSONSource, MapLibreMap, NavigationControl, ScaleControl,
+  AttributionControl, GeoJSONSource, MapLibreMap, NavigationControl, Popup, ScaleControl,
   setWorkerUrl,
   type MapLayerMouseEvent, type MapMouseEvent,
 } from 'maplibre-gl';
@@ -40,13 +41,23 @@ interface Props {
   showLabels: boolean;
   fitBounds: [number, number, number, number] | null;
   onSelect: (index: number | null) => void;
+  /** 吹き出しを出す位置。null なら閉じる */
+  popupAt: [number, number] | null;
+  /** 吹き出しの中身 */
+  children?: ReactNode;
 }
 
 export default function MapView({
-  geojson, kokuBreaks, showNrct, showLabels, fitBounds, onSelect,
+  geojson, kokuBreaks, showNrct, showLabels, fitBounds, onSelect, popupAt, children,
 }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
+  // 吹き出しの中身は React が描く。MapLibre には器の DOM だけを渡す。
+  const popup = useRef<Popup | null>(null);
+  const popupNode = useRef<HTMLDivElement | null>(null);
+  if (!popupNode.current && typeof document !== 'undefined') {
+    popupNode.current = document.createElement('div');
+  }
   const [ready, setReady] = useState(false);
   const [layersAdded, setLayersAdded] = useState(false);
   const [featureCount, setFeatureCount] = useState(0);
@@ -154,6 +165,30 @@ export default function MapView({
     m.setLayoutProperty(LABEL_LAYER, 'visibility', showLabels ? 'visible' : 'none');
   }, [showLabels, ready]);
 
+  // 選択した村の上に吹き出しを出す。位置が変わっても開いたまま動かす。
+  useEffect(() => {
+    const m = map.current;
+    const node = popupNode.current;
+    if (!m || !ready || !node) return;
+    if (!popupAt) {
+      popup.current?.remove();
+      return;
+    }
+    if (!popup.current) {
+      popup.current = new Popup({
+        closeButton: false,      // 閉じるボタンは中身側で用意している
+        closeOnClick: false,     // 地図のクリックは MapView 側で拾って選択を外す
+        focusAfterOpen: false,
+        maxWidth: '320px',
+        offset: 12,
+        className: 'village-popup',
+      });
+    }
+    popup.current.setLngLat(popupAt).setDOMContent(node).addTo(m);
+  }, [popupAt, ready]);
+
+  useEffect(() => () => { popup.current?.remove(); popup.current = null; }, []);
+
   useEffect(() => {
     const m = map.current;
     if (!m || !ready || !fitBounds) return;
@@ -178,6 +213,7 @@ export default function MapView({
         </div>
       )}
       {mapError && <div className="maperror">地図の描画に問題があります: {mapError}</div>}
+      {popupAt && popupNode.current && createPortal(children, popupNode.current)}
     </>
   );
 }

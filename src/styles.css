@@ -169,3 +169,36 @@ aside footer p { margin: 0 0 3px; }
 .badge-ok { background: #e3ede3; color: #2f5a34; border: 1px solid #b8d0ba; }
 .badge-review { background: #fdf0e6; color: #8a4b1f; border: 1px solid #e0b48c; }
 .stats .review { color: #8a4b1f; font-weight: 600; }
+
+/* 村を選んだときの吹き出し。中身は VillageDetail をそのまま描いている。 */
+.village-popup .maplibregl-popup-content {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+.village-popup .detail {
+  margin-bottom: 0;
+  width: 300px;
+  max-width: 100%;
+  max-height: 60vh;
+  overflow-y: auto;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
+}
+/* 吹き出しの三角は、向いている辺だけ色を持つ。全辺を塗ると四角くなる。 */
+.village-popup.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.village-popup.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.village-popup.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: var(--panel);
+}
+.village-popup.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.village-popup.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.village-popup.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: var(--panel);
+}
+.village-popup.maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: var(--panel); }
+.village-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--panel); }
+
+@media (max-width: 800px) {
+  .village-popup .detail { width: 76vw; }
+}

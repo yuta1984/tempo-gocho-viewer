@@ -7,7 +7,7 @@ import StatsBar from './components/StatsBar';
 import VillageDetail from './components/VillageDetail';
 import { loadDataset, type Dataset } from './lib/data';
 import { boundsOf, buildGeoJson, defaultFilters, gunsInSource } from './lib/filter';
-import type { Filters } from './types';
+import { F, type Filters } from './types';
 
 export default function App() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
@@ -77,6 +77,7 @@ export default function App() {
   }
 
   const { meta, points } = dataset;
+  const selectedPoint = selected !== null ? points[selected] ?? null : null;
   // 選択中の国で座標が付かなかった村の数。統計から黙って落とさず明示する。
   const unmapped = filters.src === null
     ? meta.counts.skippedNoCoord
@@ -113,9 +114,6 @@ export default function App() {
           distribution={meta.koku.distribution}
           total={meta.counts.mapped}
         />
-        {selected !== null && points[selected] && (
-          <VillageDetail point={points[selected]} meta={meta} onClose={() => setSelected(null)} />
-        )}
         <footer>
           <p>
             地図: <a href="https://rekichizu.jp/" target="_blank" rel="noreferrer">れきちず</a>（CC BY-NC-ND 4.0・非商用）
@@ -138,7 +136,12 @@ export default function App() {
           showLabels={showLabels}
           fitBounds={fitBounds}
           onSelect={setSelected}
-        />
+          popupAt={selectedPoint ? [selectedPoint[F.Lng], selectedPoint[F.Lat]] : null}
+        >
+          {selectedPoint && (
+            <VillageDetail point={selectedPoint} meta={meta} onClose={() => setSelected(null)} />
+          )}
+        </MapView>
         <StatsBar stats={result.stats} meta={meta} sourceLabel={sourceLabel} unmapped={unmapped} />
       </main>
     </div>
